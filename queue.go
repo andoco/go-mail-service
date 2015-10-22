@@ -4,7 +4,10 @@ import (
   "bufio"
   "encoding/json"
   "fmt"
+  "log"
   "os"
+
+  "github.com/kelseyhightower/envconfig"
 )
 
 type MailEnqueuer interface {
@@ -12,6 +15,10 @@ type MailEnqueuer interface {
 }
 
 type FileMailEnqueuer struct {
+}
+
+type FileMailEnqueuerSpec struct {
+  DropFolder string
 }
 
 func check(e error) {
@@ -23,10 +30,16 @@ func check(e error) {
 func (q FileMailEnqueuer) Enqueue(msg *MailMessage) {
   fmt.Printf("queueuing message %s\n", msg.Id)
 
-  dropPath := os.Getenv("ANDOCO_MAILSERVICE_DROP")
-  fmt.Printf("Drop path is set to: %v\n", dropPath)
+  var spec FileMailEnqueuerSpec
 
-  filename := fmt.Sprintf("%s/mailmsg-%s", dropPath, msg.Id)
+  err := envconfig.Process("ANDOCO_MAILSERVICE", &spec)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  fmt.Printf("Drop path is set to: %v\n", spec.DropFolder)
+
+  filename := fmt.Sprintf("%s/mailmsg-%s", spec.DropFolder, msg.Id)
 
   if _, err := os.Stat(filename); os.IsNotExist(err) {
 
