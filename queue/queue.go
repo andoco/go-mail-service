@@ -33,16 +33,12 @@ func Stop() {
 }
 
 func process(c chan *models.MailMessage, done chan bool, enqueuer MailEnqueuer) {
-  for {
-    msg, more := <-c
-    if more {
-      enqueuer.Enqueue(msg)
-    } else {
-      log.Print("Finished processing mail queue channel")
-      done <- true
-      return
-    }
+  for msg := range c {
+    enqueuer.Enqueue(msg)
   }
+
+  log.Print("Finished processing mail queue channel")
+  done <- true
 }
 
 func newEnqueuer() MailEnqueuer {
