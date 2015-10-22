@@ -3,11 +3,14 @@ package main
 import (
   "encoding/json"
 	"fmt"
-	"net/http"
+  "net/http"
+  "github.com/andoco/mail-service/queue"
+  "github.com/andoco/mail-service/models"
 
   "github.com/goji/param"
   "github.com/satori/go.uuid"
 	"github.com/zenazn/goji"
+  "github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 )
 
@@ -16,7 +19,7 @@ func hello(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
-	var msg MailMessage
+	var msg models.MailMessage
 
 	r.ParseForm()
 	err := param.Parse(r.Form, &msg)
@@ -28,17 +31,25 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 
   msg.Id = uuid.NewV1().String()
 
-  enqueuer := FileMailEnqueuer{}
-  enqueuer.Enqueue(&msg)
+  queue.Enqueue(&msg)
 
-  resource := MailMessageResource{Msg: &msg}
+  resource := models.MailMessageResource{Msg: &msg}
 
   encoder := json.NewEncoder(w)
   encoder.Encode(resource)
 }
 
 func main() {
+  queue.Start()
+
 	goji.Get("/hello/:name", hello)
 	goji.Post("/mail", postMail)
+
+  graceful.PostHook(func () {
+    queue.Stop()
+  })
+
 	goji.Serve()
+
+  graceful.Wait()
 }

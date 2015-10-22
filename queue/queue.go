@@ -1,4 +1,4 @@
-package main
+package queue
 
 import (
   "bufio"
@@ -7,11 +7,50 @@ import (
   "log"
   "os"
 
+  "github.com/andoco/mail-service/models"
+
   "github.com/kelseyhightower/envconfig"
 )
 
+var queueChannel = make(chan *models.MailMessage)
+var done = make(chan bool)
+var enqueuer = newEnqueuer()
+
+func Enqueue(msg *models.MailMessage) {
+  queueChannel <- msg
+}
+
+func Start() {
+  go process(queueChannel, done, enqueuer)
+}
+
+func Stop() {
+  log.Print("Stopping queue")
+  log.Print("Closing mail queue channel")
+  close(queueChannel)
+  <-done
+  log.Print("Stop queue complete")
+}
+
+func process(c chan *models.MailMessage, done chan bool, enqueuer MailEnqueuer) {
+  for {
+    msg, more := <-c
+    if more {
+      enqueuer.Enqueue(msg)
+    } else {
+      log.Print("Finished processing mail queue channel")
+      done <- true
+      return
+    }
+  }
+}
+
+func newEnqueuer() MailEnqueuer {
+  return FileMailEnqueuer{}
+}
+
 type MailEnqueuer interface {
-  Enqueue(msg *MailMessage)
+  Enqueue(msg *models.MailMessage)
 }
 
 type FileMailEnqueuer struct {
@@ -27,7 +66,7 @@ func check(e error) {
     }
 }
 
-func (q FileMailEnqueuer) Enqueue(msg *MailMessage) {
+func (q FileMailEnqueuer) Enqueue(msg *models.MailMessage) {
   fmt.Printf("queueuing message %s\n", msg.Id)
 
   var spec FileMailEnqueuerSpec
