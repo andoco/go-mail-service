@@ -12,15 +12,18 @@ import (
   "github.com/kelseyhightower/envconfig"
 )
 
-var queueChannel = make(chan *models.MailMessage)
-var done = make(chan bool)
-var enqueuer = newEnqueuer()
+var queueChannel chan *models.MailMessage
+var done chan bool
+var enqueuer MailEnqueuer
 
 func Enqueue(msg *models.MailMessage) {
   queueChannel <- msg
 }
 
 func Start() {
+  queueChannel = make(chan *models.MailMessage)
+  done = make(chan bool)
+  enqueuer = newEnqueuer()
   go process(queueChannel, done, enqueuer)
 }
 
