@@ -23,7 +23,10 @@ func check(e error) {
 func (q FileMailEnqueuer) Enqueue(msg *MailMessage) {
   fmt.Printf("queueuing message %s\n", msg.Id)
 
-  filename := fmt.Sprintf("/tmp/mailmsg-%s", msg.Id)
+  dropPath := os.Getenv("ANDOCO_MAILSERVICE_DROP")
+  fmt.Printf("Drop path is set to: %v\n", dropPath)
+
+  filename := fmt.Sprintf("%s/mailmsg-%s", dropPath, msg.Id)
 
   if _, err := os.Stat(filename); os.IsNotExist(err) {
 
