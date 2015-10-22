@@ -25,6 +25,8 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+  msg.Id = "1"
+
   encoder := json.NewEncoder(w)
   encoder.Encode(msg)
 }
