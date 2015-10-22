@@ -6,6 +6,7 @@ import (
 	"net/http"
 
   "github.com/goji/param"
+  "github.com/satori/go.uuid"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
@@ -15,7 +16,7 @@ func hello(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
-	var msg MailMessageResource
+	var msg MailMessage
 
 	r.ParseForm()
 	err := param.Parse(r.Form, &msg)
@@ -25,10 +26,15 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  msg.Id = "1"
+  msg.Id = uuid.NewV4().String()
+
+  enqueuer := FileMailEnqueuer{}
+  enqueuer.Enqueue(&msg)
+
+  resource := MailMessageResource{Msg: &msg}
 
   encoder := json.NewEncoder(w)
-  encoder.Encode(msg)
+  encoder.Encode(resource)
 }
 
 func main() {
