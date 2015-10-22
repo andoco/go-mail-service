@@ -26,7 +26,7 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  msg.Id = uuid.NewV4().String()
+  msg.Id = uuid.NewV1().String()
 
   enqueuer := FileMailEnqueuer{}
   enqueuer.Enqueue(&msg)
