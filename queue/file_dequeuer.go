@@ -3,19 +3,37 @@ package queue
 import (
   "encoding/json"
   "io/ioutil"
+  "path"
   "path/filepath"
   "log"
   "os"
 
   "github.com/andoco/mail-service/models"
+  "github.com/kelseyhightower/envconfig"
 )
+
+var spec FileMailEnqueuerSpec
+
+func init() {
+  err := envconfig.Process("ANDOCO_MAILSERVICE", &spec)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  log.Printf("Drop path is set to: %v\n", spec.DropFolder)
+}
+
+type FileMailDequeuerSpec struct {
+  DropFolder string
+}
 
 type FileMailDequeuer struct {
 
 }
 
 func (dequeuer FileMailDequeuer) Dequeue() *models.MailMessage {
-  matches, err := filepath.Glob("/tmp/mailmsg-*")
+  pattern := path.Join(spec.DropFolder, "mailmsg-*")
+  matches, err := filepath.Glob(pattern)
   if err != nil {
     log.Fatal(err)
   }
