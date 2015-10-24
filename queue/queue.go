@@ -1,30 +1,37 @@
 package queue
 
 import (
-  "bufio"
-  "encoding/json"
-  "fmt"
   "log"
-  "os"
+  "time"
 
   "github.com/andoco/mail-service/models"
-
-  "github.com/kelseyhightower/envconfig"
 )
 
 var queueChannel chan *models.MailMessage
 var done chan bool
 var enqueuer MailEnqueuer
+var dequeuer MailDequeuer
+var listeners []chan *models.MailMessage
 
 func Enqueue(msg *models.MailMessage) {
   queueChannel <- msg
+}
+
+func Listen() chan *models.MailMessage {
+  c := make(chan *models.MailMessage)
+  listeners = append(listeners, c)
+
+  return c
 }
 
 func Start() {
   queueChannel = make(chan *models.MailMessage)
   done = make(chan bool)
   enqueuer = newEnqueuer()
+  dequeuer = newDequeuer()
+  listeners = []chan *models.MailMessage{}
   go process(queueChannel, done, enqueuer)
+  go processDequeue()
 }
 
 func Stop() {
@@ -44,56 +51,29 @@ func process(c chan *models.MailMessage, done chan bool, enqueuer MailEnqueuer) 
   done <- true
 }
 
+func processDequeue() {
+  log.Print("Processing queue")
+  for {
+    msg := dequeuer.Dequeue()
+    if msg != nil {
+      log.Printf("Processing message %s", msg.Id)
+    }
+
+    time.Sleep(500 * time.Millisecond)
+  }
+}
+
 func newEnqueuer() MailEnqueuer {
   return FileMailEnqueuer{}
 }
 
+func newDequeuer() MailDequeuer {
+  return FileMailDequeuer{}
+}
 type MailEnqueuer interface {
   Enqueue(msg *models.MailMessage)
 }
 
-type FileMailEnqueuer struct {
-}
-
-type FileMailEnqueuerSpec struct {
-  DropFolder string
-}
-
-func check(e error) {
-    if e != nil {
-        panic(e)
-    }
-}
-
-func (q FileMailEnqueuer) Enqueue(msg *models.MailMessage) {
-  fmt.Printf("queueuing message %s\n", msg.Id)
-
-  var spec FileMailEnqueuerSpec
-
-  err := envconfig.Process("ANDOCO_MAILSERVICE", &spec)
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  fmt.Printf("Drop path is set to: %v\n", spec.DropFolder)
-
-  filename := fmt.Sprintf("%s/mailmsg-%s", spec.DropFolder, msg.Id)
-
-  if _, err := os.Stat(filename); os.IsNotExist(err) {
-
-    f, err := os.Create(filename)
-    check(err)
-    defer f.Close()
-
-    w := bufio.NewWriter(f)
-
-    encoder := json.NewEncoder(w)
-    encoder.Encode(msg)
-
-    w.Flush()
-
-    /*bytes := []byte(msg.Message)
-    err := ioutil.WriteFile(filename, bytes, 0644)
-    check(err)*/
-  }
+type MailDequeuer interface {
+  Dequeue() *models.MailMessage
 }
