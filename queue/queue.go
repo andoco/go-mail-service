@@ -55,8 +55,13 @@ func processDequeue() {
   log.Print("Processing queue")
   for {
     msg := dequeuer.Dequeue()
+
     if msg != nil {
       log.Printf("Processing message %s", msg.Id)
+      
+      for _, c := range listeners {
+        c <-msg
+      }
     }
 
     time.Sleep(500 * time.Millisecond)

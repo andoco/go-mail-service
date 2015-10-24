@@ -3,6 +3,7 @@ package main
 import (
   "encoding/json"
 	"fmt"
+  "log"
   "net/http"
   "github.com/andoco/mail-service/queue"
   "github.com/andoco/mail-service/models"
@@ -48,6 +49,12 @@ func main() {
   graceful.PostHook(func () {
     queue.Stop()
   })
+
+  go func() {
+    for msg := range queue.Listen() {
+      log.Printf("Will send msg %s", msg.Id)
+    }
+  }()
 
 	goji.Serve()
 
