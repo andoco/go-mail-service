@@ -3,8 +3,8 @@ package main
 import (
   "encoding/json"
 	"fmt"
-  "log"
   "net/http"
+  "github.com/andoco/mail-service/delivery"
   "github.com/andoco/mail-service/queue"
   "github.com/andoco/mail-service/models"
 
@@ -51,8 +51,9 @@ func main() {
   })
 
   go func() {
+    sender := delivery.FakeMailSender{}
     for msg := range queue.Listen() {
-      log.Printf("Will send msg %s", msg.Id)
+      sender.Send(msg)
     }
   }()
 
