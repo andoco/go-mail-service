@@ -1,17 +1,17 @@
 package main
 
 import (
-  "encoding/json"
+	"encoding/json"
 	"fmt"
-  "net/http"
-  "github.com/andoco/mail-service/delivery"
-  "github.com/andoco/mail-service/queue"
-  "github.com/andoco/mail-service/models"
+	"github.com/andoco/mail-service/delivery"
+	"github.com/andoco/mail-service/models"
+	"github.com/andoco/mail-service/queue"
+	"net/http"
 
-  "github.com/goji/param"
-  "github.com/satori/go.uuid"
+	"github.com/goji/param"
+	"github.com/satori/go.uuid"
 	"github.com/zenazn/goji"
-  "github.com/zenazn/goji/graceful"
+	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 )
 
@@ -30,34 +30,34 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  msg.Id = uuid.NewV1().String()
+	msg.Id = uuid.NewV1().String()
 
-  queue.Enqueue(&msg)
+	queue.Enqueue(&msg)
 
-  resource := models.MailMessageResource{Msg: &msg}
+	resource := models.MailMessageResource{Msg: &msg}
 
-  encoder := json.NewEncoder(w)
-  encoder.Encode(resource)
+	encoder := json.NewEncoder(w)
+	encoder.Encode(resource)
 }
 
 func main() {
-  queue.Start()
+	queue.Start()
 
 	goji.Get("/hello/:name", hello)
 	goji.Post("/mail", postMail)
 
-  graceful.PostHook(func () {
-    queue.Stop()
-  })
+	graceful.PostHook(func() {
+		queue.Stop()
+	})
 
-  go func() {
-    sender := delivery.FakeMailSender{}
-    for msg := range queue.Listen() {
-      sender.Send(msg)
-    }
-  }()
+	go func() {
+		sender := delivery.SmtpMailSender{}
+		for msg := range queue.Listen() {
+			sender.Send(msg)
+		}
+	}()
 
 	goji.Serve()
 
-  graceful.Wait()
+	graceful.Wait()
 }

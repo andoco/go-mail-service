@@ -9,6 +9,7 @@ type MailMessage struct {
 	To      string    `param:"to"`
 	From    string    `param:"from"`
 	Message string    `param:"message"`
+	Subject string		`param:"subject"`
 	Time    time.Time `param:"time"`
 }
 
