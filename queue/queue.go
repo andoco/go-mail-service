@@ -1,10 +1,10 @@
 package queue
 
 import (
-  "log"
-  "time"
+	"log"
+	"time"
 
-  "bitbucket.org/andoco/gomailservice/models"
+	"bitbucket.org/andoco/gomailservice/models"
 )
 
 var queueChannel chan *models.MailMessage
@@ -14,71 +14,72 @@ var dequeuer MailDequeuer
 var listeners []chan *models.MailMessage
 
 func Enqueue(msg *models.MailMessage) {
-  queueChannel <- msg
+	queueChannel <- msg
 }
 
 func Listen() chan *models.MailMessage {
-  c := make(chan *models.MailMessage)
-  listeners = append(listeners, c)
+	c := make(chan *models.MailMessage)
+	listeners = append(listeners, c)
 
-  return c
+	return c
 }
 
 func Start() {
-  queueChannel = make(chan *models.MailMessage)
-  done = make(chan bool)
-  enqueuer = newEnqueuer()
-  dequeuer = newDequeuer()
-  listeners = []chan *models.MailMessage{}
-  go process(queueChannel, done, enqueuer)
-  go processDequeue()
+	queueChannel = make(chan *models.MailMessage)
+	done = make(chan bool)
+	enqueuer = newEnqueuer()
+	dequeuer = newDequeuer()
+	listeners = []chan *models.MailMessage{}
+	go process(queueChannel, done, enqueuer)
+	go processDequeue()
 }
 
 func Stop() {
-  log.Print("Stopping queue")
-  log.Print("Closing mail queue channel")
-  close(queueChannel)
-  <-done
-  log.Print("Stop queue complete")
+	log.Print("Stopping queue")
+	log.Print("Closing mail queue channel")
+	close(queueChannel)
+	<-done
+	log.Print("Stop queue complete")
 }
 
 func process(c chan *models.MailMessage, done chan bool, enqueuer MailEnqueuer) {
-  for msg := range c {
-    enqueuer.Enqueue(msg)
-  }
+	for msg := range c {
+		enqueuer.Enqueue(msg)
+	}
 
-  log.Print("Finished processing mail queue channel")
-  done <- true
+	log.Print("Finished processing mail queue channel")
+	done <- true
 }
 
 func processDequeue() {
-  log.Print("Processing queue")
-  for {
-    msg := dequeuer.Dequeue()
+	log.Print("Processing queue")
+	for {
+		msg := dequeuer.Dequeue()
 
-    if msg != nil {
-      log.Printf("Processing message %s", msg.Id)
-      
-      for _, c := range listeners {
-        c <-msg
-      }
-    }
+		if msg != nil {
+			log.Printf("Processing message %s", msg.Id)
 
-    time.Sleep(500 * time.Millisecond)
-  }
+			for _, c := range listeners {
+				c <- msg
+			}
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func newEnqueuer() MailEnqueuer {
-  return FileMailEnqueuer{}
+	return FileMailEnqueuer{}
 }
 
 func newDequeuer() MailDequeuer {
-  return FileMailDequeuer{}
+	return FileMailDequeuer{}
 }
+
 type MailEnqueuer interface {
-  Enqueue(msg *models.MailMessage)
+	Enqueue(msg *models.MailMessage)
 }
 
 type MailDequeuer interface {
-  Dequeue() *models.MailMessage
+	Dequeue() *models.MailMessage
 }

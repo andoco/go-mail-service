@@ -30,7 +30,7 @@ type SmtpMailSender struct {
 }
 
 func (s SmtpMailSender) Send(msg *models.MailMessage) {
-  log.Printf("Sending message %s", msg.Id)
+	log.Printf("Sending message %s", msg.Id)
 
 	var spec SmtpMailSenderSpec
 
@@ -39,20 +39,20 @@ func (s SmtpMailSender) Send(msg *models.MailMessage) {
 		log.Fatal(err)
 	}
 
-  auth := smtp.PlainAuth("", spec.User, spec.Pwd, spec.Server)
+	auth := smtp.PlainAuth("", spec.User, spec.Pwd, spec.Server)
 
-  address := fmt.Sprintf("%v:%v", spec.Server, 587)
+	address := fmt.Sprintf("%v:%v", spec.Server, 587)
 
-  body := []byte("To: " + msg.To + "\r\nSubject: " + msg.Subject + "\r\n\r\n" + msg.Message)
+	body := []byte("To: " + msg.To + "\r\nSubject: " + msg.Subject + "\r\n\r\n" + msg.Message)
 
-  err = smtp.SendMail(
+	err = smtp.SendMail(
 		address,
 		auth,
 		spec.User,
-    []string{msg.To},
+		[]string{msg.To},
 		body,
 	)
 	if err != nil {
-    log.Fatal(err)
+		log.Fatal(err)
 	}
 }

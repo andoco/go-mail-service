@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"bitbucket.org/andoco/gomailservice/delivery"
 	"bitbucket.org/andoco/gomailservice/models"
 	"bitbucket.org/andoco/gomailservice/queue"
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/goji/param"
