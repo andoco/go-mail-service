@@ -4,7 +4,7 @@ import (
   "log"
   "time"
 
-  "github.com/andoco/mail-service/models"
+  "bitbucket.org/andoco/gomailservice/models"
 )
 
 var queueChannel chan *models.MailMessage

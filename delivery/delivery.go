@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/smtp"
 
-	"github.com/andoco/mail-service/models"
+	"bitbucket.org/andoco/gomailservice/models"
 	"github.com/kelseyhightower/envconfig"
 )
 

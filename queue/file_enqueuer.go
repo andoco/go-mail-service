@@ -7,8 +7,8 @@ import (
   "log"
   "os"
 
-  "github.com/andoco/mail-service/common"
-  "github.com/andoco/mail-service/models"
+  "bitbucket.org/andoco/gomailservice/common"
+  "bitbucket.org/andoco/gomailservice/models"
   "github.com/kelseyhightower/envconfig"
 )
 
