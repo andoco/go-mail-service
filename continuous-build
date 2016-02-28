@@ -3,4 +3,4 @@
 . scripts/setenv.sh
 sudo scripts/fakesmtp &
 
-reflex -c reflex.conf -e
+reflex -c reflex.conf 
