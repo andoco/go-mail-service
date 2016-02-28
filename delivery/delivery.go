@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
+	"strings"
 
 	"bitbucket.org/andoco/gomailservice/models"
 	"github.com/kelseyhightower/envconfig"
 )
+
+var sender MailSender
 
 type SmtpMailSenderSpec struct {
 	Server string
@@ -43,16 +46,26 @@ func (s SmtpMailSender) Send(msg *models.MailMessage) {
 
 	address := fmt.Sprintf("%v:%v", spec.Server, 587)
 
-	body := []byte("To: " + msg.To + "\r\nSubject: " + msg.Subject + "\r\n\r\n" + msg.Message)
+	body := []byte("To: " + strings.Join(msg.To, ", ") + "\r\nSubject: " + msg.Subject + "\r\n\r\n" + msg.Message)
 
 	err = smtp.SendMail(
 		address,
 		auth,
 		spec.User,
-		[]string{msg.To},
+		msg.To,
 		body,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func Deliver(msg models.MailMessage) error {
+	sender.Send(&msg)
+	// TODO: error handling
+	return nil
+}
+
+func init() {
+	sender = SmtpMailSender{}
 }

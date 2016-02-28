@@ -6,7 +6,7 @@ import (
 
 type MailMessage struct {
 	Id      string
-	To      string    `param:"to"`
+	To      []string  `param:"to"`
 	From    string    `param:"from"`
 	Message string    `param:"message"`
 	Subject string    `param:"subject"`

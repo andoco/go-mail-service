@@ -3,6 +3,8 @@ package job
 import (
 	"log"
 
+	"bitbucket.org/andoco/gomailservice/delivery"
+	"bitbucket.org/andoco/gomailservice/models"
 	"bitbucket.org/andoco/gomailservice/template"
 )
 
@@ -22,9 +24,15 @@ func Process(job Job) error {
 	rendered, _ := template.Render(job.TemplateId, job.Fields)
 
 	// Construct MailMessage
+	msg := models.MailMessage{
+		To:      job.To,
+		Subject: "test msg",
+		Message: rendered,
+	}
 
 	// deliver
 	log.Printf("Rendered:\n%s", rendered)
+	delivery.Deliver(msg)
 
 	return nil
 }
