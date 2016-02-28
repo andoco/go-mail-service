@@ -19,27 +19,27 @@ type SmtpMailSenderSpec struct {
 }
 
 type MailSender interface {
-	Send(msg *models.MailMessage)
+	Send(msg *models.MailMessage) error
 }
 
 type FakeMailSender struct {
 }
 
-func (s FakeMailSender) Send(msg *models.MailMessage) {
+func (s FakeMailSender) Send(msg *models.MailMessage) error {
 	log.Printf("Sending message %s", msg.Id)
+	return nil
 }
 
 type SmtpMailSender struct {
 }
 
-func (s SmtpMailSender) Send(msg *models.MailMessage) {
+func (s SmtpMailSender) Send(msg *models.MailMessage) error {
 	log.Printf("Sending message %s", msg.Id)
 
 	var spec SmtpMailSenderSpec
 
-	err := envconfig.Process("ANDOCO_MAILSERVICE_SMTP", &spec)
-	if err != nil {
-		log.Fatal(err)
+	if err := envconfig.Process("ANDOCO_MAILSERVICE_SMTP", &spec); err != nil {
+		return fmt.Errorf("could not process envconfig; %v", err)
 	}
 
 	auth := smtp.PlainAuth("", spec.User, spec.Pwd, spec.Server)
@@ -48,22 +48,23 @@ func (s SmtpMailSender) Send(msg *models.MailMessage) {
 
 	body := []byte("To: " + strings.Join(msg.To, ", ") + "\r\nSubject: " + msg.Subject + "\r\n\r\n" + msg.Message)
 
-	err = smtp.SendMail(
+	if err := smtp.SendMail(
 		address,
 		auth,
 		spec.User,
 		msg.To,
 		body,
-	)
-	if err != nil {
-		log.Fatal(err)
+	); err != nil {
+		return fmt.Errorf("error sending mail; %v", err)
 	}
+
+	log.Printf("Sent message %s", msg.Id)
+
+	return nil
 }
 
 func Deliver(msg models.MailMessage) error {
-	sender.Send(&msg)
-	// TODO: error handling
-	return nil
+	return sender.Send(&msg)
 }
 
 func init() {

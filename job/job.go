@@ -1,6 +1,7 @@
 package job
 
 import (
+	"fmt"
 	"log"
 
 	"bitbucket.org/andoco/gomailservice/delivery"
@@ -30,9 +31,10 @@ func Process(job Job) error {
 		Message: rendered,
 	}
 
-	// deliver
-	log.Printf("Rendered:\n%s", rendered)
-	delivery.Deliver(msg)
+	// Deliver
+	if err := delivery.Deliver(msg); err != nil {
+		return fmt.Errorf("error processing job; %v", err)
+	}
 
 	return nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"bitbucket.org/andoco/gomailservice/delivery"
@@ -52,6 +53,7 @@ func postJob(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := job.Process(mailjob); err != nil {
+		log.Printf("error handling postJob; %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
