@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+. scripts/setenv.sh
+sudo scripts/fakesmtp &
+
+reflex -c reflex.conf -e
