@@ -1,12 +1,14 @@
 package main
 
 import (
-	"bitbucket.org/andoco/gomailservice/delivery"
-	"bitbucket.org/andoco/gomailservice/models"
-	"bitbucket.org/andoco/gomailservice/queue"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"bitbucket.org/andoco/gomailservice/delivery"
+	"bitbucket.org/andoco/gomailservice/job"
+	"bitbucket.org/andoco/gomailservice/models"
+	"bitbucket.org/andoco/gomailservice/queue"
 
 	"github.com/goji/param"
 	"github.com/satori/go.uuid"
@@ -40,11 +42,26 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 	encoder.Encode(resource)
 }
 
+func postJob(c web.C, w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	var mailjob job.Job
+	if err := decoder.Decode(&mailjob); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := job.Process(mailjob); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func main() {
 	queue.Start()
 
 	goji.Get("/hello/:name", hello)
 	goji.Post("/mail", postMail)
+	goji.Post("/job", postJob)
 
 	graceful.PostHook(func() {
 		queue.Stop()
@@ -53,6 +70,8 @@ func main() {
 	go func() {
 		sender := delivery.SmtpMailSender{}
 		for msg := range queue.Listen() {
+			//rendered, _ := template.Render(msg)
+			//log.Printf("Rendered message: %s", rendered)
 			sender.Send(msg)
 		}
 	}()
