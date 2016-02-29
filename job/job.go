@@ -10,12 +10,12 @@ import (
 )
 
 type Job struct {
-	TemplateId string `json:"templateId"`
-	Fields     map[string]string
-	To         []string `json:"to"`
-	Cc         string
-	Bcc        string
-	From       string
+	TemplateId string                 `json:"templateId"`
+	Fields     map[string]interface{} `json:"fields"`
+	To         []string               `json:"to"`
+	Cc         []string               `json:"cc"`
+	Bcc        []string               `json:"bcc"`
+	From       string                 `json:"from"`
 }
 
 func Process(job Job) error {
