@@ -5,8 +5,6 @@ import (
 	"log"
 
 	"github.com/cbroglie/mustache"
-
-	"bitbucket.org/andoco/gomailservice/models"
 )
 
 type Engine struct {
@@ -18,10 +16,6 @@ type Template struct {
 	EngineId      string
 	Content       string
 	DefaultFields map[string]interface{}
-}
-
-type Renderer interface {
-	Render(msg *models.MailMessage) (string, error)
 }
 
 func loadTemplate(templateId string) (string, error) {

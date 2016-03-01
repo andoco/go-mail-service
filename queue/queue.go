@@ -4,32 +4,32 @@ import (
 	"log"
 	"time"
 
-	"bitbucket.org/andoco/gomailservice/models"
+	"bitbucket.org/andoco/gomailservice/delivery"
 )
 
-var queueChannel chan *models.MailMessage
+var queueChannel chan *delivery.MailMessage
 var done chan bool
 var enqueuer MailEnqueuer
 var dequeuer MailDequeuer
-var listeners []chan *models.MailMessage
+var listeners []chan *delivery.MailMessage
 
-func Enqueue(msg *models.MailMessage) {
+func Enqueue(msg *delivery.MailMessage) {
 	queueChannel <- msg
 }
 
-func Listen() chan *models.MailMessage {
-	c := make(chan *models.MailMessage)
+func Listen() chan *delivery.MailMessage {
+	c := make(chan *delivery.MailMessage)
 	listeners = append(listeners, c)
 
 	return c
 }
 
 func Start() {
-	queueChannel = make(chan *models.MailMessage)
+	queueChannel = make(chan *delivery.MailMessage)
 	done = make(chan bool)
 	enqueuer = newEnqueuer()
 	dequeuer = newDequeuer()
-	listeners = []chan *models.MailMessage{}
+	listeners = []chan *delivery.MailMessage{}
 	go process(queueChannel, done, enqueuer)
 	go processDequeue()
 }
@@ -42,7 +42,7 @@ func Stop() {
 	log.Print("Stop queue complete")
 }
 
-func process(c chan *models.MailMessage, done chan bool, enqueuer MailEnqueuer) {
+func process(c chan *delivery.MailMessage, done chan bool, enqueuer MailEnqueuer) {
 	for msg := range c {
 		enqueuer.Enqueue(msg)
 	}
@@ -77,9 +77,9 @@ func newDequeuer() MailDequeuer {
 }
 
 type MailEnqueuer interface {
-	Enqueue(msg *models.MailMessage)
+	Enqueue(msg *delivery.MailMessage)
 }
 
 type MailDequeuer interface {
-	Dequeue() *models.MailMessage
+	Dequeue() *delivery.MailMessage
 }

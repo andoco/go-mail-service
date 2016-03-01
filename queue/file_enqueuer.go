@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"bitbucket.org/andoco/gomailservice/common"
-	"bitbucket.org/andoco/gomailservice/models"
+	"bitbucket.org/andoco/gomailservice/delivery"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -19,7 +19,7 @@ type FileMailEnqueuerSpec struct {
 	DropFolder string
 }
 
-func (q FileMailEnqueuer) Enqueue(msg *models.MailMessage) {
+func (q FileMailEnqueuer) Enqueue(msg *delivery.MailMessage) {
 	fmt.Printf("queueuing message %s\n", msg.Id)
 
 	var spec FileMailEnqueuerSpec

@@ -8,7 +8,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"bitbucket.org/andoco/gomailservice/models"
+	"bitbucket.org/andoco/gomailservice/delivery"
+
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -30,7 +31,7 @@ type FileMailDequeuerSpec struct {
 type FileMailDequeuer struct {
 }
 
-func (dequeuer FileMailDequeuer) Dequeue() *models.MailMessage {
+func (dequeuer FileMailDequeuer) Dequeue() *delivery.MailMessage {
 	pattern := path.Join(spec.DropFolder, "mailmsg-*")
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
@@ -45,7 +46,7 @@ func (dequeuer FileMailDequeuer) Dequeue() *models.MailMessage {
 				log.Fatal(err)
 			}
 
-			var msg *models.MailMessage
+			var msg *delivery.MailMessage
 
 			if err := json.Unmarshal(dat, &msg); err != nil {
 				log.Fatal(err)

@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	"bitbucket.org/andoco/gomailservice/api"
 	"bitbucket.org/andoco/gomailservice/delivery"
 	"bitbucket.org/andoco/gomailservice/job"
-	"bitbucket.org/andoco/gomailservice/models"
 	"bitbucket.org/andoco/gomailservice/queue"
 
 	"github.com/goji/param"
@@ -23,7 +23,7 @@ func hello(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
-	var msg models.MailMessage
+	var msg delivery.MailMessage
 
 	r.ParseForm()
 	err := param.Parse(r.Form, &msg)
@@ -37,7 +37,7 @@ func postMail(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	queue.Enqueue(&msg)
 
-	resource := models.MailMessageResource{Msg: &msg}
+	resource := api.MailMessageResource{Msg: &msg}
 
 	encoder := json.NewEncoder(w)
 	encoder.Encode(resource)

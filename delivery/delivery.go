@@ -5,12 +5,21 @@ import (
 	"log"
 	"net/smtp"
 	"strings"
+	"time"
 
-	"bitbucket.org/andoco/gomailservice/models"
 	"github.com/kelseyhightower/envconfig"
 )
 
 var sender MailSender
+
+type MailMessage struct {
+	Id      string
+	To      []string  `param:"to"`
+	From    string    `param:"from"`
+	Message string    `param:"message"`
+	Subject string    `param:"subject"`
+	Time    time.Time `param:"time"`
+}
 
 type SmtpMailSenderSpec struct {
 	Server string
@@ -19,13 +28,13 @@ type SmtpMailSenderSpec struct {
 }
 
 type MailSender interface {
-	Send(msg *models.MailMessage) error
+	Send(msg *MailMessage) error
 }
 
 type FakeMailSender struct {
 }
 
-func (s FakeMailSender) Send(msg *models.MailMessage) error {
+func (s FakeMailSender) Send(msg *MailMessage) error {
 	log.Printf("Sending message %s", msg.Id)
 	return nil
 }
@@ -33,7 +42,7 @@ func (s FakeMailSender) Send(msg *models.MailMessage) error {
 type SmtpMailSender struct {
 }
 
-func (s SmtpMailSender) Send(msg *models.MailMessage) error {
+func (s SmtpMailSender) Send(msg *MailMessage) error {
 	log.Printf("Sending message %s", msg.Id)
 
 	var spec SmtpMailSenderSpec
@@ -63,7 +72,7 @@ func (s SmtpMailSender) Send(msg *models.MailMessage) error {
 	return nil
 }
 
-func Deliver(msg models.MailMessage) error {
+func Deliver(msg MailMessage) error {
 	return sender.Send(&msg)
 }
 

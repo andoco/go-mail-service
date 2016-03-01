@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"bitbucket.org/andoco/gomailservice/delivery"
-	"bitbucket.org/andoco/gomailservice/models"
 	"bitbucket.org/andoco/gomailservice/template"
 )
 
@@ -28,7 +27,7 @@ func Process(job Job) error {
 	}
 
 	// Construct MailMessage
-	msg := models.MailMessage{
+	msg := delivery.MailMessage{
 		To:      job.To,
 		Subject: "test msg",
 		Message: rendered,
