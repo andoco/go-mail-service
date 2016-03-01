@@ -24,20 +24,17 @@ type Renderer interface {
 	Render(msg *models.MailMessage) (string, error)
 }
 
-var testTmpl = `Hello {{fullname}},
-
-You are {{age}} years old.
-
-Items:
-{{#items}}
-- {{key}}
-{{/items}}
-{{#subscribe}}You have chosen to subscribe.{{/subscribe}}
-
-Bye.`
-
 func loadTemplate(templateId string) (string, error) {
-	return testTmpl, nil
+	log.Printf("Loading template with id %s", templateId)
+
+	data, err := Asset(fmt.Sprintf("%s.mustache", templateId))
+	if err != nil {
+		return "", fmt.Errorf("error loading template with id %s; %v", templateId, err)
+	}
+
+	log.Printf("Loaded template %s:\n%s", templateId, string(data))
+
+	return string(data), nil
 }
 
 func Render(templateId string, fields map[string]interface{}) (string, error) {

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo 'Building data using go-bindata'
+go-bindata -pkg template -prefix template/data -o template/bindata.go template/data

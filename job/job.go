@@ -22,7 +22,10 @@ func Process(job Job) error {
 	log.Printf("Processing job")
 
 	// render
-	rendered, _ := template.Render(job.TemplateId, job.Fields)
+	rendered, err := template.Render(job.TemplateId, job.Fields)
+	if err != nil {
+		return fmt.Errorf("error processing job; %v", err)
+	}
 
 	// Construct MailMessage
 	msg := models.MailMessage{
