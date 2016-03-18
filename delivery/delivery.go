@@ -43,7 +43,7 @@ type SmtpMailSender struct {
 }
 
 func (s SmtpMailSender) Send(msg *MailMessage) error {
-	log.Printf("Sending message %s", msg.Id)
+	log.Printf("Sending message %v", msg)
 
 	var spec SmtpMailSenderSpec
 

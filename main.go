@@ -3,6 +3,7 @@ package main
 import (
 	"bitbucket.org/andoco/gomailservice/api"
 	"bitbucket.org/andoco/gomailservice/delivery"
+	"bitbucket.org/andoco/gomailservice/job"
 	"bitbucket.org/andoco/gomailservice/queue"
 
 	"github.com/zenazn/goji"
@@ -10,6 +11,10 @@ import (
 )
 
 func main() {
+	steps := []job.Step{job.RenderStep{TemplateId: "default"}, job.BuildMessageStep{}, job.DeliveryStep{}}
+	pipeline := job.NewPipeline("default", steps)
+	job.AddPipeline(pipeline)
+
 	queue.Start()
 
 	goji.Get("/hello/:name", api.Hello)

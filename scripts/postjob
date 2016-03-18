@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-curl -XPOST http://localhost:8000/job -d '{"templateId":"default","to":["foo@bar.com"],"fields":{"fullname":"Foo Bar","age":30,"items":[{"key":"value 1"}, {"key":"value 2"}],"subscribe":true}}'
+curl -XPOST http://localhost:8000/job -d '{"pipelineId":"default","to":["foo@bar.com"],"fields":{"fullname":"Foo Bar","age":30,"items":[{"key":"value 1"}, {"key":"value 2"}],"subscribe":true}}'
