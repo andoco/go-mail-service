@@ -11,6 +11,22 @@ import (
 const msgFieldKey = "msg"
 
 /*
+ * MergeFieldStep
+ */
+
+type SetFieldStep struct {
+	Fields map[string]interface{}
+}
+
+func (step SetFieldStep) Process(state *JobState) error {
+	for k, v := range step.Fields {
+		state.job.Fields[k] = v
+	}
+
+	return nil
+}
+
+/*
  * RenderStep
  */
 

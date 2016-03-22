@@ -11,7 +11,17 @@ import (
 )
 
 func main() {
-	steps := []job.Step{job.RenderStep{TemplateId: "default"}, job.BuildMessageStep{}, job.DeliveryStep{}}
+	customFields := map[string]interface{}{
+		"siteUrl": "http://localhost",
+	}
+
+	steps := []job.Step{
+		job.SetFieldStep{Fields: customFields},
+		job.RenderStep{TemplateId: "default"},
+		job.BuildMessageStep{},
+		job.DeliveryStep{},
+	}
+
 	pipeline := job.NewPipeline("default", steps)
 	job.AddPipeline(pipeline)
 
