@@ -38,7 +38,6 @@ func main() {
 		}()
 	*/
 
-	goji.Post("/mail", api.PostMail)
 	goji.Post("/job", api.PostJob)
 	goji.Serve()
 
