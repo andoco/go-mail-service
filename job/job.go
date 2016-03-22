@@ -3,8 +3,6 @@ package job
 import (
 	"fmt"
 	"log"
-
-	"bitbucket.org/andoco/gomailservice/delivery"
 )
 
 var pipelines = make(map[string]Pipeline)
@@ -34,7 +32,6 @@ func NewPipeline(id string, steps []Step) Pipeline {
 
 type JobState struct {
 	job Job
-	msg delivery.MailMessage
 }
 
 type Step interface {

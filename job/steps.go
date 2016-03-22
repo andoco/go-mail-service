@@ -8,6 +8,8 @@ import (
 	"bitbucket.org/andoco/gomailservice/template"
 )
 
+const msgFieldKey = "msg"
+
 /*
  * RenderStep
  */
@@ -50,13 +52,15 @@ func (step BuildMessageStep) Process(state *JobState) error {
 	}
 
 	// Construct MailMessage
-	state.msg = delivery.MailMessage{
+	msg := delivery.MailMessage{
 		To:      job.To,
 		Subject: subject.(string),
 		Message: content.(string),
 	}
 
-	log.Printf("built message %v", state.msg)
+	log.Printf("built message %v", msg)
+
+	job.Fields[msgFieldKey] = msg
 
 	return nil
 }
@@ -69,5 +73,10 @@ type DeliveryStep struct {
 }
 
 func (s DeliveryStep) Process(state *JobState) error {
-	return delivery.Deliver(state.msg)
+	msg, ok := state.job.Fields[msgFieldKey]
+	if !ok {
+		return fmt.Errorf("error finding MailMessage object in job fields under key %s", msgFieldKey)
+	}
+
+	return delivery.Deliver(msg.(delivery.MailMessage))
 }
