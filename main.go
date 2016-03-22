@@ -27,7 +27,6 @@ func main() {
 
 	queue.Start()
 
-	goji.Get("/hello/:name", api.Hello)
 	goji.Post("/mail", api.PostMail)
 	goji.Post("/job", api.PostJob)
 

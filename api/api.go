@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -16,10 +15,6 @@ import (
 
 type MailMessageResource struct {
 	Msg *delivery.MailMessage
-}
-
-func Hello(c web.C, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello asdf, %s!", c.URLParams["name"])
 }
 
 func PostMail(c web.C, w http.ResponseWriter, r *http.Request) {
